@@ -3,7 +3,7 @@ import os
 
 # ---------------- SETTINGS ----------------
 
-IMAGE_PATH = "images/2_1.jpg"
+IMAGE_PATH = "../../BEProject/images/Manuscript02(SPPU_SANSKRIT)/2_2.jpg"
 OUTPUT_DIR = "output"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -23,6 +23,7 @@ bottom_y = None
 x_start = None
 
 saved_images = []
+saved_regions = []   # Stores (left, top, right, bottom)
 
 counter = len(os.listdir(OUTPUT_DIR)) + 1
 
@@ -31,7 +32,16 @@ def redraw():
     global display
 
     display = image.copy()
-
+    # Draw completed regions
+    for left, top, right, bottom in saved_regions:
+        cv2.rectangle(
+            display,
+            (left, top),
+            (right, bottom),
+            (0, 0, 255),   # Red
+            2
+        )
+        
     if top_y is not None:
         cv2.line(display, (0, top_y),
                  (display.shape[1], top_y),
@@ -96,7 +106,8 @@ def mouse(event, x, y, flags, param):
         )
 
         cv2.imwrite(filename, crop)
-
+        saved_regions.append((left, top, right, bottom))
+        
         print("Saved:", filename)
 
         saved_images.append(filename)
@@ -149,9 +160,12 @@ while True:
 
             if os.path.exists(last):
                 os.remove(last)
-
+            
+            saved_regions.pop()
             counter -= 1
-
+            
+            redraw()
+            
             print("Deleted:", last)
 
 cv2.destroyAllWindows()
