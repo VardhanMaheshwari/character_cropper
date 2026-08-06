@@ -17,10 +17,7 @@ if image is None:
 
 display = image.copy()
 
-top_y = None
-bottom_y = None
-
-x_start = None
+start_point = None   # (x, y)
 
 saved_images = []
 saved_regions = []   # Stores (left, top, right, bottom)
@@ -32,91 +29,67 @@ def redraw():
     global display
 
     display = image.copy()
-    # Draw completed regions
+    overlay = display.copy()
+
     for left, top, right, bottom in saved_regions:
         cv2.rectangle(
-            display,
+            overlay,
             (left, top),
             (right, bottom),
-            (0, 0, 255),   # Red
-            2
+            (0, 0, 255),
+            -1
         )
-        
-    if top_y is not None:
-        cv2.line(display, (0, top_y),
-                 (display.shape[1], top_y),
-                 (0,255,0),2)
 
-    if bottom_y is not None:
-        cv2.line(display, (0,bottom_y),
-                 (display.shape[1],bottom_y),
-                 (0,0,255),2)
+    alpha = 0.35
+    cv2.addWeighted(overlay, alpha, display, 1-alpha, 0, display)
 
-    if x_start is not None:
-        cv2.line(display,
-                 (x_start,0),
-                 (x_start,display.shape[0]),
-                 (255,0,0),1)
+    if start_point is not None:
+        cv2.circle(display, start_point, 4, (0,255,0), -1)
 
 
 def mouse(event, x, y, flags, param):
 
-    global top_y
-    global bottom_y
-    global x_start
+    global start_point
     global counter
 
-    # Ctrl + Left = Top Y
-    if event == cv2.EVENT_LBUTTONDOWN and flags & cv2.EVENT_FLAG_CTRLKEY:
-        top_y = y
+    if event != cv2.EVENT_LBUTTONDOWN:
+        return
+
+    # First click -> top-left
+    if start_point is None:
+        start_point = (x, y)
         redraw()
         return
 
-    # Ctrl + Right = Bottom Y
-    if event == cv2.EVENT_RBUTTONDOWN and flags & cv2.EVENT_FLAG_CTRLKEY:
-        bottom_y = y
-        redraw()
-        return
+    # Second click -> bottom-right
+    x1, y1 = start_point
+    x2, y2 = x, y
 
-    # Normal left click
-    if event == cv2.EVENT_LBUTTONDOWN:
+    left = min(x1, x2)
+    right = max(x1, x2)
 
-        if top_y is None or bottom_y is None:
-            print("Set Top and Bottom Y first.")
-            return
+    top = min(y1, y2)
+    bottom = max(y1, y2)
 
-        if x_start is None:
-            x_start = x
-            redraw()
-            return
+    crop = image[top:bottom, left:right]
 
-        x_end = x
+    filename = os.path.join(
+        OUTPUT_DIR,
+        f"char_{counter:04d}.png"
+    )
 
-        left = min(x_start, x_end)
-        right = max(x_start, x_end)
+    cv2.imwrite(filename, crop)
 
-        top = min(top_y, bottom_y)
-        bottom = max(top_y, bottom_y)
+    saved_images.append(filename)
+    saved_regions.append((left, top, right, bottom))
 
-        crop = image[top:bottom, left:right]
+    print("Saved:", filename)
 
-        filename = os.path.join(
-            OUTPUT_DIR,
-            f"char_{counter:04d}.png"
-        )
+    counter += 1
 
-        cv2.imwrite(filename, crop)
-        saved_regions.append((left, top, right, bottom))
-        
-        print("Saved:", filename)
+    start_point = None
 
-        saved_images.append(filename)
-
-        counter += 1
-
-        x_start = None
-
-        redraw()
+    redraw()
 
 MAX_WIDTH = 1200
 MAX_HEIGHT = 800
@@ -145,7 +118,7 @@ while True:
 
     # Cancel current selection
     elif key == ord('c'):
-        x_start = None
+        start_point = None
         redraw()
 
     # Reload
