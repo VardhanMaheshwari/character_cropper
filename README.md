@@ -13,18 +13,32 @@ character_cropper/
 └── output/
 ```
 
-- **images/** → Place the manuscript image(s) here.
-- **output/** → Cropped character images are saved here automatically.
+* **images/** – Store the manuscript image(s).
+* **output/** – Cropped character images are saved here automatically.
 
 ## Requirements
 
-- Python 3.8+
-- OpenCV
+* Python 3.8+
+* OpenCV
 
 Install OpenCV:
 
 ```bash
 pip install opencv-python
+```
+
+## Configuration
+
+Update the image path in `cropper.py` before running:
+
+```python
+IMAGE_PATH = "images/Manuscript02(SPPU_SANSKRIT)/2_2.jpg"
+```
+
+The output directory is created automatically if it does not already exist:
+
+```python
+OUTPUT_DIR = "output"
 ```
 
 ## Running the Tool
@@ -35,25 +49,28 @@ python cropper.py
 
 ## Controls
 
-| Action | Control |
-|--------|---------|
-| Set Top Y | Ctrl + Left Click |
-| Set Bottom Y | Ctrl + Right Click |
-| Select Start X | Left Click |
-| Select End X & Save Crop | Left Click |
-| Cancel Current Selection | C |
-| Undo Last Crop | Z |
-| Refresh Display | R |
-| Quit | Q |
+| Action                             | Control    |
+| ---------------------------------- | ---------- |
+| Select first corner of crop        | Left Click |
+| Select opposite corner & save crop | Left Click |
+| Cancel current selection           | C          |
+| Undo last crop                     | Z          |
+| Refresh display                    | R          |
+| Quit                               | Q          |
 
 ## Workflow
 
-1. Place the manuscript image inside the `images/` folder.
-2. Update the `IMAGE_PATH` in `cropper.py` if needed.
-3. Run the script.
-4. Set the **Top Y** and **Bottom Y** using **Ctrl + Click**.
-5. Click the left and right boundaries of each character.
-6. Cropped images are automatically saved in the `output/` folder as:
+1. Update `IMAGE_PATH` with the manuscript image you want to crop.
+2. Run the script.
+3. Click once to select the first corner of a character.
+4. Click again on the opposite corner to define the crop.
+5. The selected region is automatically saved in the `output/` directory.
+6. Continue selecting characters until finished.
+7. Press **Q** to exit.
+
+## Output
+
+Each cropped character is saved as:
 
 ```text
 char_0001.png
@@ -62,8 +79,14 @@ char_0003.png
 ...
 ```
 
-## Notes
+If the `output/` directory already contains images, numbering continues from the next available index.
 
-- The tool keeps accepting crops until you press **Q**.
-- Images are automatically numbered.
-- Press **Z** to delete the last saved crop if a mistake is made.
+## Features
+
+* Manual two-click rectangular cropping.
+* Automatic sequential file naming.
+* Semi-transparent overlay showing previously cropped regions.
+* Undo the last saved crop with **Z**.
+* Cancel the current selection with **C**.
+* Refresh the display with **R**.
+* Automatically resizes the display window to fit within **1200 × 800** while preserving the image's original resolution for cropping.
