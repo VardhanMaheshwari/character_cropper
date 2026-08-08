@@ -3,7 +3,7 @@ import os
 
 # ---------------- SETTINGS ----------------
 
-IMAGE_PATH = "../../BEProject/images/Manuscript02(SPPU_SANSKRIT)/2_2.jpg"
+IMAGE_PATH = "../../BEProject/images/Manuscript02(SPPU_SANSKRIT)/3_1.jpg"
 OUTPUT_DIR = "output"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -23,7 +23,6 @@ saved_images = []
 saved_regions = []   # Stores (left, top, right, bottom)
 
 counter = len(os.listdir(OUTPUT_DIR)) + 1
-
 
 def redraw():
     global display
